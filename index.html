@@ -3,44 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serve Constant JSON</title>
+    <title>Static JSON Response</title>
 </head>
 <body>
-    <h1>Mock API Server</h1>
-    <p>Access the endpoint <code>/entitlement/abcd</code> to get the JSON response.</p>
-    <pre id="output"></pre>
+    <h1>Static JSON Response</h1>
+    <p>Query any endpoint, and the same JSON will be served.</p>
+    <pre id="response">Waiting for request...</pre>
 
     <script>
-        // Mock JSON data to be served
-        const mockResponses = {
-            '/entitlement/abcd': {
-                constant1: "This is constant 1",
-                constant2: "This is constant 2",
-                constant3: "This is constant 3"
-            }
+        // Define the static JSON response
+        const staticResponse = {
+            constant1: "This is a static constant value",
+            constant2: "This value is the same for all endpoints",
+            constant3: "Welcome to the static response"
         };
 
-        // Intercept fetch API for the mocked endpoint
-        window.addEventListener('DOMContentLoaded', () => {
+        // Intercept all fetch requests and return the same JSON
+        window.addEventListener("DOMContentLoaded", () => {
             const originalFetch = window.fetch;
             window.fetch = async (url, options) => {
-                if (mockResponses[url]) {
-                    return new Response(JSON.stringify(mockResponses[url]), {
-                        status: 200,
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                }
-                return originalFetch(url, options); // fallback for other requests
+                console.log(`Intercepted request to: ${url}`);
+                return new Response(JSON.stringify(staticResponse), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" }
+                });
             };
 
-            // Example call to fetch the mock endpoint
-            fetch('/entitlement/abcd')
-                .then((response) => response.json())
-                .then((data) => {
-                    document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            // Example demonstration: Fetch from a fake endpoint
+            fetch("/any/random/endpoint")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("response").textContent = JSON.stringify(data, null, 2);
                 })
-                .catch((err) => {
-                    console.error('Error:', err);
+                .catch(error => {
+                    document.getElementById("response").textContent = `Error: ${error}`;
                 });
         });
     </script>
