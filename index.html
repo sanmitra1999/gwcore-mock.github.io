@@ -48,7 +48,7 @@
 </head>
 <body>
   <h1>Customer Entitlement Lookup</h1>
-  <p>Enter a Customer ID to view entitlement data, or navigate directly to <code>/entitlement/&lt;customerid&gt;</code>.</p>
+  <p>Enter a Customer ID to view entitlement data or navigate to <code>/entitlement/v1/&lt;customerid&gt;</code>.</p>
   
   <input type="text" id="customerId" placeholder="Enter Customer ID" />
   <button id="fetchEntitlement">Fetch Entitlement</button>
@@ -60,7 +60,7 @@
     async function fetchEntitlement(customerId) {
       const responseDiv = document.getElementById('response');
       try {
-        const response = await fetch(`/entitlement/${customerId}.json`);
+        const response = await fetch(`/entitlement/v1/${customerId}`);
         if (!response.ok) {
           throw new Error(`Entitlement for customer "${customerId}" not found.`);
         }
