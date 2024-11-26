@@ -90,19 +90,31 @@
       }
     }
 
-    // Handle page load
     document.addEventListener('DOMContentLoaded', () => {
-      const path = window.location.pathname;
-      const queryParams = getQueryParams();
+        const path = window.location.pathname;
+        const queryParams = new URLSearchParams(window.location.search);
+        const featureFilter = queryParams.get('feature'); // Extract 'feature' query parameter
 
-      // Extract the customer ID from the URL path
-      if (path.startsWith('/entitlements/v1/')) {
-        const customerId = path.split('/')[3];
-        const featureFilter = queryParams.feature || null;
-        if (customerId) {
-          fetchEntitlement(customerId, featureFilter);
+        if (path.startsWith('/entitlement/v1/')) {
+            const customerId = path.split('/')[3];
+            fetch(`/entitlement/v1/${customerId}.json`) // Explicitly fetch JSON file
+            .then(response => {
+                if (!response.ok) throw new Error('Customer data not found');
+                return response.json();
+            })
+            .then(data => {
+                // Optionally filter data based on the query parameter
+                if (featureFilter) {
+                data.entitlements = data.entitlements.filter(feature =>
+                    feature.toLowerCase().includes(featureFilter.toLowerCase())
+                );
+                }
+                document.getElementById('response').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('response').innerText = `Error: ${error.message}`;
+            });
         }
-      }
     });
 
     // Handle button click to fetch entitlement data
