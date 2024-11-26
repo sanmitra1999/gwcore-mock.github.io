@@ -1,44 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Static JSON Response</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entitlement Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    input {
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      border-radius: 4px;
+    }
+    .error {
+      color: red;
+    }
+  </style>
 </head>
 <body>
-    <h1>Static JSON Response</h1>
-    <p>Query any endpoint, and the same JSON will be served.</p>
-    <pre id="response">Waiting for request...</pre>
+  <h1>Customer Entitlement Lookup</h1>
+  <p>Enter a Customer ID to view entitlement data, or navigate directly to <code>/entitlement/&lt;customerid&gt;</code>.</p>
+  
+  <input type="text" id="customerId" placeholder="Enter Customer ID" />
+  <button id="fetchEntitlement">Fetch Entitlement</button>
+  
+  <div id="response" class="response"></div>
 
-    <script>
-        // Define the static JSON response
-        const staticResponse = {
-            constant1: "This is a static constant value",
-            constant2: "This value is the same for all endpoints",
-            constant3: "Welcome to the static response"
-        };
+  <script>
+    // Fetch JSON entitlement data from the static files
+    async function fetchEntitlement(customerId) {
+      const responseDiv = document.getElementById('response');
+      try {
+        const response = await fetch(`/entitlement/${customerId}.json`);
+        if (!response.ok) {
+          throw new Error(`Entitlement for customer "${customerId}" not found.`);
+        }
+        const data = await response.json();
+        responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (error) {
+        responseDiv.innerHTML = `<p class="error">${error.message}</p>`;
+      }
+    }
 
-        // Intercept all fetch requests and return the same JSON
-        window.addEventListener("DOMContentLoaded", () => {
-            const originalFetch = window.fetch;
-            window.fetch = async (url, options) => {
-                console.log(`Intercepted request to: ${url}`);
-                return new Response(JSON.stringify(staticResponse), {
-                    status: 200,
-                    headers: { "Content-Type": "application/json" }
-                });
-            };
-
-            // Example demonstration: Fetch from a fake endpoint
-            fetch("/any/random/endpoint")
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("response").textContent = JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    document.getElementById("response").textContent = `Error: ${error}`;
-                });
-        });
-    </script>
+    // Handle button click to fetch entitlement data
+    document.getElementById('fetchEntitlement').addEventListener('click', () => {
+      const customerId = document.getElementById('customerId').value.trim();
+      if (!customerId) {
+        alert('Please enter a valid Customer ID.');
+        return;
+      }
+      fetchEntitlement(customerId);
+    });
+  </script>
 </body>
 </html>
